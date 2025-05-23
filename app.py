@@ -6,7 +6,6 @@ from dotenv import load_dotenv
 # Load API keys
 load_dotenv()
 NEWS_API_KEY = os.getenv("NEWS_API_KEY")
-UNSPLASH_KEY = os.getenv("UNSPLASH_ACCESS_KEY")
 
 # Define topics
 topics = {
@@ -25,18 +24,9 @@ def fetch_news(topic):
         return []
     return response.json().get("articles", [])
 
-# Function to fetch image from Unsplash
-def fetch_image(query):
-    url = f"https://api.unsplash.com/photos/random?query={query}&client_id={UNSPLASH_KEY}"
-    response = requests.get(url)
-    if response.status_code != 200:
-        return None
-    data = response.json()
-    return data.get("urls", {}).get("small")
-
 # Streamlit UI
 st.set_page_config(page_title="News Digest", layout="wide")
-st.title("📰 AI-Powered News Digest (No Summary)")
+st.title("📰 AI-Powered News Digest")
 
 # Style
 st.markdown("""
@@ -50,6 +40,8 @@ st.markdown("""
 }
 img {
     border-radius: 8px;
+    max-height: 150px;
+    object-fit: cover;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -65,9 +57,10 @@ for category, query in topics.items():
     for i, article in enumerate(articles):
         with cols[i % 3]:
             st.markdown('<div class="card">', unsafe_allow_html=True)
-            image_url = fetch_image(query)
-            if image_url:
-                st.image(image_url, use_column_width=True)
+            if article.get("urlToImage"):
+                st.image(article["urlToImage"], use_column_width=True)
+            else:
+                st.image("https://via.placeholder.com/300x150?text=No+Image", use_column_width=True)
             st.markdown(f"**[{article.get('title', 'No Title')}]({article.get('url')})**", unsafe_allow_html=True)
             st.caption(article.get('source', {}).get('name', 'Unknown Source'))
             st.markdown('</div>', unsafe_allow_html=True)
