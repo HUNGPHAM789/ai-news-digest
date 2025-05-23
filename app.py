@@ -1,4 +1,3 @@
-
 import os
 import requests
 import openai
@@ -28,17 +27,24 @@ def fetch_news(topic):
         return []
     return response.json().get("articles", [])
 
-# Function to summarize article using OpenAI
+# Function to summarize article using OpenAI Chat API
 def summarize(text):
     if not text:
         return "No content to summarize."
-    prompt = f"Summarize this in 3 sentences:\n{text}"
-    response = openai.Completion.create(
-        engine="text-davinci-003",
-        prompt=prompt,
-        max_tokens=100
-    )
-    return response.choices[0].text.strip()
+
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant that summarizes news articles."},
+                {"role": "user", "content": f"Please summarize this article in 3 sentences:\n{text}"}
+            ],
+            max_tokens=150,
+            temperature=0.7
+        )
+        return response.choices[0].message["content"].strip()
+    except Exception as e:
+        return f"Summary failed: {e}"
 
 # Function to fetch image from Unsplash
 def fetch_image(query):
@@ -63,21 +69,6 @@ for category, query in topics.items():
         image_url = fetch_image(query)
         if image_url:
             st.image(image_url, width=400)
-        summary = def summarize(text):
-    if not text:
-        return "No content to summarize."
-
-    try:
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": "You are a helpful assistant that summarizes news articles."},
-                {"role": "user", "content": f"Please summarize this article in 3 sentences:\n{text}"}
-            ],
-            max_tokens=150,
-            temperature=0.7
-        )
-        return response.choices[0].message["content"].strip()
-    except Exception as e:
-        return f"Summary failed: {e}"
-
+        summary = summarize(article.get("description") or article.get("content") or "")
+        st.write(summary)
+        st.markdown("---")
