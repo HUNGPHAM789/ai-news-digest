@@ -68,3 +68,6 @@ for category, query in topics.items():
             else:
                 st.image("https://via.placeholder.com/300x150?text=No+Image", use_container_width=True)
             st.markdown(f"**[{article.get('title', 'No Title')}]({article.get('url')})**", unsafe_allow_html=True)
+            st.caption(article.get('source', {}).get('name', 'Unknown Source'))
+            st.markdown(get_excerpt(article))
+            st.markdown('</div>', unsafe_allow_html=True)
