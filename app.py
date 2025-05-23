@@ -63,6 +63,21 @@ for category, query in topics.items():
         image_url = fetch_image(query)
         if image_url:
             st.image(image_url, width=400)
-        summary = summarize(article.get("description") or article.get("content") or "")
-        st.write(summary)
-        st.markdown(f"[Read more]({article.get('url')})")
+        summary = def summarize(text):
+    if not text:
+        return "No content to summarize."
+
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant that summarizes news articles."},
+                {"role": "user", "content": f"Please summarize this article in 3 sentences:\n{text}"}
+            ],
+            max_tokens=150,
+            temperature=0.7
+        )
+        return response.choices[0].message["content"].strip()
+    except Exception as e:
+        return f"Summary failed: {e}"
+
