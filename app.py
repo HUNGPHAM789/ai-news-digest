@@ -24,6 +24,12 @@ def fetch_news(topic):
         return []
     return response.json().get("articles", [])
 
+# Function to extract first 30 words from content/description
+def get_excerpt(article):
+    text = article.get("description") or article.get("content") or ""
+    words = text.split()
+    return " ".join(words[:30]) + ("..." if len(words) > 30 else "")
+
 # Streamlit UI
 st.set_page_config(page_title="News Digest", layout="wide")
 st.title("📰 AI-Powered News Digest")
@@ -58,9 +64,7 @@ for category, query in topics.items():
         with cols[i % 3]:
             st.markdown('<div class="card">', unsafe_allow_html=True)
             if article.get("urlToImage"):
-                st.image(article["urlToImage"], use_column_width=True)
+                st.image(article["urlToImage"], use_container_width=True)
             else:
-                st.image("https://via.placeholder.com/300x150?text=No+Image", use_column_width=True)
+                st.image("https://via.placeholder.com/300x150?text=No+Image", use_container_width=True)
             st.markdown(f"**[{article.get('title', 'No Title')}]({article.get('url')})**", unsafe_allow_html=True)
-            st.caption(article.get('source', {}).get('name', 'Unknown Source'))
-            st.markdown('</div>', unsafe_allow_html=True)
