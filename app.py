@@ -1,12 +1,12 @@
 import os
 import requests
-import openai
+from openai import OpenAI
 import streamlit as st
 from dotenv import load_dotenv
 
 # Load API keys
 load_dotenv()
-openai.api_key = os.getenv("OPENAI_API_KEY")
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 NEWS_API_KEY = os.getenv("NEWS_API_KEY")
 UNSPLASH_KEY = os.getenv("UNSPLASH_ACCESS_KEY")
 
@@ -27,13 +27,13 @@ def fetch_news(topic):
         return []
     return response.json().get("articles", [])
 
-# Function to summarize article using OpenAI Chat API
+# Function to summarize article using OpenAI Chat API (v1.0+)
 def summarize(text):
     if not text:
         return "No content to summarize."
 
     try:
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": "You are a helpful assistant that summarizes news articles."},
@@ -42,7 +42,7 @@ def summarize(text):
             max_tokens=150,
             temperature=0.7
         )
-        return response.choices[0].message["content"].strip()
+        return response.choices[0].message.content.strip()
     except Exception as e:
         return f"Summary failed: {e}"
 
